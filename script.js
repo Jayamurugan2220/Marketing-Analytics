@@ -1,4 +1,169 @@
-// ==================== CSV Parsing ====================
+// ==================== History Management ====================
+class HistoryManager {
+    constructor() {
+        this.storageKey = 'ironAnalyticsHistory';
+        this.maxEntries = 20;
+    }
+
+    saveAnalysis(data, analysis) {
+        const history = this.getHistory();
+        const entry = {
+            id: Date.now(),
+            fileName: data[0] ? 'Dataset' : 'Unknown',
+            timestamp: new Date().toLocaleString(),
+            dataPoints: data.length,
+            totalRevenue: analysis.totalRevenue.toFixed(2),
+            totalSpend: analysis.totalSpend.toFixed(2),
+            roi: analysis.roi.toFixed(2),
+            data: data,
+            analysis: analysis
+        };
+
+        history.unshift(entry);
+        
+        // Keep only last 20 entries
+        if (history.length > this.maxEntries) {
+            history.pop();
+        }
+
+        localStorage.setItem(this.storageKey, JSON.stringify(history));
+        this.updateHistoryUI();
+        return entry.id;
+    }
+
+    getHistory() {
+        try {
+            const data = localStorage.getItem(this.storageKey);
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            console.error('Error reading history:', e);
+            return [];
+        }
+    }
+
+    getEntry(id) {
+        const history = this.getHistory();
+        return history.find(entry => entry.id === id);
+    }
+
+    deleteEntry(id) {
+        let history = this.getHistory();
+        history = history.filter(entry => entry.id !== id);
+        localStorage.setItem(this.storageKey, JSON.stringify(history));
+        this.updateHistoryUI();
+    }
+
+    clearAll() {
+        if (confirm('Are you sure you want to delete all history? This cannot be undone.')) {
+            localStorage.removeItem(this.storageKey);
+            this.updateHistoryUI();
+        }
+    }
+
+    updateHistoryUI() {
+        const history = this.getHistory();
+        const historyList = document.getElementById('historyList');
+        
+        if (history.length === 0) {
+            historyList.innerHTML = '<p class="history-empty">No history yet. Upload a file to get started!</p>';
+            return;
+        }
+
+        historyList.innerHTML = history.map(entry => `
+            <div class="history-item" data-id="${entry.id}">
+                <div class="history-item-title">📊 ${entry.fileName}</div>
+                <div class="history-item-date">📅 ${entry.timestamp}</div>
+                <div class="history-item-stats">
+                    <div>📈 Points: ${entry.dataPoints}</div>
+                    <div>💰 Revenue: $${entry.totalRevenue}</div>
+                    <div>📊 ROI: ${entry.roi}%</div>
+                </div>
+                <div class="history-item-actions">
+                    <button class="history-item-btn load-history" data-id="${entry.id}">Load</button>
+                    <button class="history-item-btn delete-history" data-id="${entry.id}">Delete</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Add event listeners
+        document.querySelectorAll('.load-history').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.loadAnalysis(parseInt(btn.dataset.id));
+            });
+        });
+
+        document.querySelectorAll('.delete-history').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteEntry(parseInt(btn.dataset.id));
+            });
+        });
+    }
+
+    loadAnalysis(id) {
+        const entry = this.getEntry(id);
+        if (!entry) {
+            alert('History entry not found');
+            return;
+        }
+
+        currentData = entry.data;
+        currentAnalysis = entry.analysis;
+        displayResults();
+        
+        // Close history panel
+        document.getElementById('historyPanel').classList.remove('open');
+    }
+
+    searchHistory(query) {
+        const history = this.getHistory();
+        const filtered = history.filter(entry => 
+            entry.fileName.toLowerCase().includes(query.toLowerCase()) ||
+            entry.timestamp.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        const historyList = document.getElementById('historyList');
+        
+        if (filtered.length === 0) {
+            historyList.innerHTML = '<p class="history-empty">No matching history found</p>';
+            return;
+        }
+
+        historyList.innerHTML = filtered.map(entry => `
+            <div class="history-item" data-id="${entry.id}">
+                <div class="history-item-title">📊 ${entry.fileName}</div>
+                <div class="history-item-date">📅 ${entry.timestamp}</div>
+                <div class="history-item-stats">
+                    <div>📈 Points: ${entry.dataPoints}</div>
+                    <div>💰 Revenue: $${entry.totalRevenue}</div>
+                    <div>📊 ROI: ${entry.roi}%</div>
+                </div>
+                <div class="history-item-actions">
+                    <button class="history-item-btn load-history" data-id="${entry.id}">Load</button>
+                    <button class="history-item-btn delete-history" data-id="${entry.id}">Delete</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Re-attach event listeners
+        document.querySelectorAll('.load-history').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.loadAnalysis(parseInt(btn.dataset.id));
+            });
+        });
+
+        document.querySelectorAll('.delete-history').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteEntry(parseInt(btn.dataset.id));
+            });
+        });
+    }
+}
+
+const historyManager = new HistoryManager();
 function parseCSV(text) {
     const lines = text.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
@@ -188,6 +353,13 @@ const resetBtn = document.getElementById('resetBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const predictBtn = document.getElementById('predictBtn');
 
+// History elements
+const historyToggle = document.getElementById('historyToggle');
+const closeHistory = document.getElementById('closeHistory');
+const historyPanel = document.getElementById('historyPanel');
+const historySearch = document.getElementById('historySearch');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
 let currentData = null;
 let currentAnalysis = null;
 let charts = {};
@@ -235,6 +407,39 @@ resetBtn.addEventListener('click', () => {
 predictBtn.addEventListener('click', predictRevenue);
 downloadBtn.addEventListener('click', downloadReport);
 
+// History Panel Events
+historyToggle.addEventListener('click', () => {
+    historyPanel.classList.add('open');
+});
+
+closeHistory.addEventListener('click', () => {
+    historyPanel.classList.remove('open');
+});
+
+historySearch.addEventListener('input', (e) => {
+    if (e.target.value.trim()) {
+        historyManager.searchHistory(e.target.value);
+    } else {
+        historyManager.updateHistoryUI();
+    }
+});
+
+clearHistoryBtn.addEventListener('click', () => {
+    historyManager.clearAll();
+});
+
+// Close history panel when clicking outside
+document.addEventListener('click', (e) => {
+    if (!historyPanel.contains(e.target) && e.target !== historyToggle) {
+        historyPanel.classList.remove('open');
+    }
+});
+
+// Initialize history UI on page load
+document.addEventListener('DOMContentLoaded', () => {
+    historyManager.updateHistoryUI();
+});
+
 // ==================== File Upload Handler ====================
 function handleFileUpload(file) {
     if (!file.name.endsWith('.csv')) {
@@ -268,6 +473,9 @@ function showError(message) {
 function displayResults() {
     uploadSection.style.display = 'none';
     resultsSection.style.display = 'block';
+
+    // Save to history
+    historyManager.saveAnalysis(currentData, currentAnalysis);
 
     // Populate data table
     populateDataTable();

@@ -19,6 +19,32 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- History Sidebar Toggle -->
+            <button class="history-toggle" id="historyToggle" title="View Analysis History">
+                📚 History
+            </button>
+
+            <!-- History Sidebar -->
+            <div class="history-panel" id="historyPanel">
+                <div class="history-header">
+                    <h3>📚 ANALYSIS HISTORY</h3>
+                    <button class="close-history" id="closeHistory">&times;</button>
+                </div>
+                
+                <div class="history-search">
+                    <input type="text" id="historySearch" placeholder="Search history...">
+                </div>
+
+                <div class="history-list" id="historyList">
+                    <p class="history-empty">No history yet. Upload a file to get started!</p>
+                </div>
+
+                <div class="history-actions">
+                    <button class="history-btn" id="clearHistoryBtn">🗑️ Clear All History</button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
             <!-- Upload Section -->
             <section class="upload-section" id="uploadSection">
                 <div class="upload-container">
