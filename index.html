@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Analytics Tool - Predict ROI</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚡ MARKETING ANALYTICS ⚡</h1>
+                <p>Strategic Advertising Intelligence & ROI Prediction Engine</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-container">
+                    <h2>🔮 DEPLOY YOUR DATA</h2>
+                    <p>Upload your advertising spend and sales data for deep-scan analysis</p>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">�</div>
+                        <p class="upload-text">Drop CSV file to initialize scan</p>
+                        <p class="upload-subtext">or click to select from database</p>
+                        <input type="file" id="csvInput" accept=".csv" hidden>
+                    </div>
+
+                    <!-- CSV Format Requirements -->
+                    <div class="format-info">
+                        <h3>⚙️ SYSTEM REQUIREMENTS:</h3>
+                        <ul>
+                            <li>✓ Column: <strong>Month</strong> - Time period identifier</li>
+                            <li>✓ Column: <strong>TV_Spend</strong> - TV advertising expenditure</li>
+                            <li>✓ Column: <strong>Radio_Spend</strong> - Radio advertising expenditure</li>
+                            <li>✓ Column: <strong>SocialMedia_Spend</strong> - Social media advertising expenditure</li>
+                            <li>✓ Column: <strong>Sales_Revenue</strong> - Sales revenue for the period</li>
+                            <li>✓ Minimum 3 rows of data required for analysis</li>
+                            <li>✓ All numeric columns must contain valid numbers</li>
+                        </ul>
+                    </div>
+
+                    <!-- Error Messages -->
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-container">
+                    <!-- Data Table -->
+                    <div class="data-table-wrapper">
+                        <h2>📋 DATA MATRIX</h2>
+                        <div class="table-scroll">
+                            <table class="data-table" id="dataTable">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Section -->
+                    <div class="statistics-section">
+                        <h2>💼 INTELLIGENCE REPORT</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Data Points</h3>
+                                <p class="stat-value" id="dataPointsCount">0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total TV Spend</h3>
+                                <p class="stat-value" id="totalTVSpend">$0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total Radio Spend</h3>
+                                <p class="stat-value" id="totalRadioSpend">$0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Social Media Spend</h3>
+                                <p class="stat-value" id="totalSocialSpend">$0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total Revenue</h3>
+                                <p class="stat-value" id="totalRevenue">$0</p>
+                            </div>
+                            <div class="stat-card">
+                                <h3>ROI Metrics</h3>
+                                <p class="stat-value" id="avgROI">0%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Correlation Analysis -->
+                    <div class="correlation-section">
+                        <h2>🎯 CORRELATION MATRIX</h2>
+                        <div class="correlation-grid">
+                            <div class="correlation-card">
+                                <h3>📺 TV Impact</h3>
+                                <p class="correlation-value" id="tvCorrelation">0.00</p>
+                                <p class="correlation-strength" id="tvStrength"></p>
+                            </div>
+                            <div class="correlation-card">
+                                <h3>📻 Radio Impact</h3>
+                                <p class="correlation-value" id="radioCorrelation">0.00</p>
+                                <p class="correlation-strength" id="radioStrength"></p>
+                            </div>
+                            <div class="correlation-card">
+                                <h3>📱 Social Impact</h3>
+                                <p class="correlation-value" id="socialCorrelation">0.00</p>
+                                <p class="correlation-strength" id="socialStrength"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-container">
+                            <h3>📈 Spending Timeline</h3>
+                            <canvas id="spendingChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>💰 Revenue Trajectory</h3>
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>🔄 Spend-Revenue Nexus</h3>
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>📊 Channel Distribution</h3>
+                            <canvas id="channelChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Prediction Section -->
+                    <div class="prediction-section">
+                        <h2>🚀 FUTURE STATE PREDICTION</h2>
+                        <div class="prediction-input-group">
+                            <div class="prediction-input">
+                                <label for="predictTVSpend">📺 TV Budget ($):</label>
+                                <input type="number" id="predictTVSpend" placeholder="0" min="0">
+                            </div>
+                            <div class="prediction-input">
+                                <label for="predictRadioSpend">📻 Radio Budget ($):</label>
+                                <input type="number" id="predictRadioSpend" placeholder="0" min="0">
+                            </div>
+                            <div class="prediction-input">
+                                <label for="predictSocialSpend">📱 Social Budget ($):</label>
+                                <input type="number" id="predictSocialSpend" placeholder="0" min="0">
+                            </div>
+                            <button class="predict-btn" id="predictBtn">⚡ PREDICT REVENUE</button>
+                        </div>
+                        <div id="predictionResult" class="prediction-result" style="display: none;">
+                            <h3>🎯 Predicted Sales Revenue</h3>
+                            <p class="prediction-value" id="predictionValue">$0</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" id="resetBtn">🔄 RESET SYSTEM</button>
+                        <button class="btn btn-primary" id="downloadBtn">⬇️ DOWNLOAD REPORT</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>⚡ MARKETING ANALYTICS ENGINE ⚡ - Powered by Advanced Data Science</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
